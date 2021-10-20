@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.http.response import HttpResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.models import User, auth
@@ -16,10 +17,12 @@ def register(request):
        # print(first_name,last_name,username,email)
         if password1 == password2:
             if User.objects.filter(username = username).exists():
-                print('Username already Taken')
+                messages.info(request, 'Username already taken')
+                #print('Username already Taken')
                 return redirect('register')
             elif User.objects.filter(email = email).exists():
-                print('This email already taken')
+                messages.info(request,'This email is already taken')
+                #print('This email already taken')
                 return redirect('register')
             else:
                 
@@ -28,7 +31,29 @@ def register(request):
                 print('User Created Successfully')
                 return redirect('/')
         else:
-            print('Password does not match')
+            messages.info(request,'Password does not match')
+            #print('Password does not match')
             return redirect('register')
     else:
         return render(request,'register.html')
+
+def login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        
+        user = auth.authenticate(username = username, password = password)
+        
+        if user is not None:
+            auth.login(request, user)
+            return redirect('/')
+        else:
+            messages.info(request,'Invalid Characters')
+    
+    else:
+        return render(request,'login.html')
+
+def logout(request):
+    auth.logout(request)
+    return redirect('login')
+    
